@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -59,6 +60,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.content.Intent.ACTION_DIAL;
+import static android.content.Intent.ACTION_VIEW;
+import static android.provider.MediaStore.ACTION_IMAGE_CAPTURE;
 
 public class LauncherProvider extends ContentProvider {
     private static final String TAG = "Launcher.LauncherProvider";
@@ -91,6 +96,8 @@ public class LauncherProvider extends ContentProvider {
      */
     static final Uri CONTENT_APPWIDGET_RESET_URI =
             Uri.parse("content://" + AUTHORITY + "/appWidgetReset");
+
+    private static final String SMS_SCHEME = "sms:";
 
     private DatabaseHelper mOpenHelper;
     private static boolean sJustLoadedFromOldDb;
@@ -277,7 +284,8 @@ public class LauncherProvider extends ContentProvider {
                 editor.putInt(DEFAULT_WORKSPACE_RESOURCE_ID, origWorkspaceResId);
             }
 
-            mOpenHelper.loadFavorites(mOpenHelper.getWritableDatabase(), workspaceResId);
+//            mOpenHelper.loadFavorites(mOpenHelper.getWritableDatabase(), workspaceResId);//TODO by lin
+            mOpenHelper.loadDefaults(mOpenHelper.getWritableDatabase());
             mOpenHelper.setFlagJustLoadedOldDb();
             editor.commit();
         }
@@ -999,6 +1007,56 @@ public class LauncherProvider extends ContentProvider {
                 throw new XmlPullParserException("Unexpected start tag: found " + parser.getName() +
                         ", expected " + firstElementName);
             }
+        }
+
+        private int loadOne(SQLiteDatabase db, PackageManager packageManager, Intent queryIntent, long container, String screen, String x, String y) {
+            ResolveInfo resolveInfo = packageManager.resolveActivity(queryIntent, PackageManager.MATCH_DEFAULT_ONLY);
+            if (resolveInfo != null) {
+                if (resolveInfo.activityInfo.packageName.equals("android")) {
+                    resolveInfo = packageManager.queryIntentActivities(queryIntent, PackageManager.MATCH_DEFAULT_ONLY).get(0);
+                }
+
+//                long container = -101;
+//                String screen = "0";
+//                String x = "0";
+//                String y = "0";
+                Intent intent = new Intent(Intent.ACTION_MAIN, null);
+                intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                ContentValues values = new ContentValues();
+
+                values.clear();
+                values.put(LauncherSettings.Favorites.CONTAINER, container);
+                values.put(LauncherSettings.Favorites.SCREEN, screen);
+                values.put(LauncherSettings.Favorites.CELLX, x);
+                values.put(LauncherSettings.Favorites.CELLY, y);
+
+//                long id = generateNewItemId();
+                intent.setComponent(new ComponentName(resolveInfo.activityInfo.packageName, resolveInfo.activityInfo.name));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                        Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                values.put(Favorites.INTENT, intent.toUri(0));
+                values.put(Favorites.TITLE, resolveInfo.loadLabel(packageManager).toString());
+                values.put(Favorites.ITEM_TYPE, Favorites.ITEM_TYPE_APPLICATION);
+                values.put(Favorites.SPANX, 1);
+                values.put(Favorites.SPANY, 1);
+                values.put(Favorites._ID, generateNewItemId());
+                if (dbInsertAndCheck(this, db, TABLE_FAVORITES, null, values) < 0) {
+                    return -1;
+                }
+            return 1;
+            }
+
+            return -1;
+        }
+
+        private int loadDefaults(SQLiteDatabase db) {
+            PackageManager packageManager = mContext.getPackageManager();
+            loadOne(db, packageManager, new Intent(ACTION_DIAL), -101, "0", "0", "0");
+            loadOne(db, packageManager, new Intent(ACTION_VIEW, Uri.parse(SMS_SCHEME)), -101, "1", "1", "0");
+            loadOne(db, packageManager, new Intent(ACTION_IMAGE_CAPTURE), -101, "3", "3", "0");
+            loadOne(db, packageManager, new Intent(ACTION_VIEW, Uri.parse("http:")), -101, "4", "4", "0");
+
+            return 0;
         }
 
         /**
