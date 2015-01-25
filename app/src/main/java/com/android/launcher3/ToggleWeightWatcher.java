@@ -1,0 +1,17 @@
+package com.android.launcher3;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+
+public class ToggleWeightWatcher extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        startActivity(new Intent(this, Launcher.class));
+
+        finish();
+    }
+}

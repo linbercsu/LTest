@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="/home/lin/zen/Launcher3/app/libs/android-support-v4.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="5896b0a4e377ac4242eb2bc785220c1c4fc052f4">
+        <dex dex="/home/lin/zen/Launcher3/app/build/intermediates/pre-dexed/debug/android-support-v4-944da9c7472b3c89e303643713f85988fc51a8bb.jar" />
+    </item>
+    <item
+        jar="/home/lin/zen/Launcher3/app/libs/protobuf-java-2.3.0.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="6311b2f08c0b08fd3da4d5e4f6aaa286c9e97918">
+        <dex dex="/home/lin/zen/Launcher3/app/build/intermediates/pre-dexed/debug/protobuf-java-2.3.0-639795aa7226d0478e3f0f8aa8ed8a940cb8aaa3.jar" />
+    </item>
+
+</items>
