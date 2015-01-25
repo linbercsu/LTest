@@ -58,7 +58,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
     private CheckLongPressHelper mLongPressHelper;
 
     // The number of icons to display in the
-    private static final int NUM_ITEMS_IN_PREVIEW = 3;
+    private static final int NUM_ITEMS_IN_PREVIEW = 4;
     private static final int CONSUMPTION_ANIMATION_DURATION = 100;
     private static final int DROP_IN_ANIMATION_DURATION = 400;
     private static final int INITIAL_ITEM_ANIMATION_DURATION = 350;
@@ -140,6 +140,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
         icon.mFolderName = (BubbleTextView) icon.findViewById(R.id.folder_icon_name);
         icon.mFolderName.setText(folderInfo.title);
         icon.mPreviewBackground = (ImageView) icon.findViewById(R.id.preview_background);
+        icon.mPreviewBackground.setVisibility(INVISIBLE);
         LauncherAppState app = LauncherAppState.getInstance();
         DeviceProfile grid = app.getDynamicGrid().getDeviceProfile();
         // Offset the preview background to center this view accordingly
@@ -233,7 +234,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
                 @Override
                 public void onAnimationStart(Animator animation) {
                     if (mFolderIcon != null) {
-                        mFolderIcon.mPreviewBackground.setVisibility(INVISIBLE);
+//                        mFolderIcon.mPreviewBackground.setVisibility(INVISIBLE);
                     }
                 }
             });
@@ -265,7 +266,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
                         mCellLayout.hideFolderAccept(FolderRingAnimator.this);
                     }
                     if (mFolderIcon != null) {
-                        mFolderIcon.mPreviewBackground.setVisibility(VISIBLE);
+//                        mFolderIcon.mPreviewBackground.setVisibility(VISIBLE);//TODO
                     }
                 }
             });
@@ -528,6 +529,42 @@ public class FolderIcon extends LinearLayout implements FolderListener {
         return params;
     }
 
+    private void drawPreviewItem(Canvas canvas, Drawable d, int index) {
+        if (index > 3)
+            return;
+
+        LinearLayout.LayoutParams  layoutParams = (LinearLayout.LayoutParams)mPreviewBackground.getLayoutParams();
+//        lp.topMargin = grid.folderBackgroundOffset;
+//        lp.width = grid.folderIconSizePx;
+//        lp.height = grid.folderIconSizePx;
+
+        int iconSize = mPreviewBackground.getWidth() / 2;
+
+        int left = mPreviewBackground.getLeft() + (index % 2) * iconSize;
+        int top = mPreviewBackground.getTop() + (index > 1 ? iconSize : 0);
+        Rect rect = new Rect(left, top, left+iconSize, top + iconSize);
+        float scale = 0.8f;
+        canvas.save();
+        left = index %2 == 0 ? (int)(left+2*(iconSize*(1.0-scale))/3) : (int)(left+(iconSize*(1.0-scale))/3);
+        top = index > 1 ? (int)(top+(iconSize*(1.0-scale))/3) : (int)(top+2*(iconSize*(1.0-scale))/3);
+        canvas.translate(left, top);
+
+        canvas.scale(scale, scale);
+
+        if (d != null) {
+            mOldBounds.set(d.getBounds());
+            d.setBounds(0, 0, iconSize, iconSize);
+//            d.setFilterBitmap(true);
+//            d.setColorFilter(Color.argb(params.overlayAlpha, 255, 255, 255),
+//                    PorterDuff.Mode.SRC_ATOP);
+            d.draw(canvas);
+//            d.clearColorFilter();
+//            d.setFilterBitmap(false);
+            d.setBounds(mOldBounds);
+        }
+        canvas.restore();
+    }
+
     private void drawPreviewItem(Canvas canvas, PreviewItemDrawingParams params) {
         canvas.save();
         canvas.translate(params.transX + mPreviewOffsetX, params.transY + mPreviewOffsetY);
@@ -570,13 +607,14 @@ public class FolderIcon extends LinearLayout implements FolderListener {
 
         int nItemsInPreview = Math.min(items.size(), NUM_ITEMS_IN_PREVIEW);
         if (!mAnimating) {
-            for (int i = nItemsInPreview - 1; i >= 0; i--) {
+            for (int i = 0; i < nItemsInPreview; i++) {
                 v = (TextView) items.get(i);
                 if (!mHiddenItems.contains(v.getTag())) {
                     d = v.getCompoundDrawables()[1];
                     mParams = computePreviewItemDrawingParams(i, mParams);
                     mParams.drawable = d;
-                    drawPreviewItem(canvas, mParams);
+//                    drawPreviewItem(canvas, mParams);
+                    drawPreviewItem(canvas, d, i);//TODO
                 }
             }
         } else {

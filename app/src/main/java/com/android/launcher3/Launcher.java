@@ -451,7 +451,7 @@ public class Launcher extends Activity
             if (sPausedFromUserAction) {
                 // If the user leaves launcher, then we should just load items asynchronously when
                 // they return.
-                mModel.startLoader(true, -1);
+                mModel.startLoader(true, -1);//TODO load
             } else {
                 // We only load the page synchronously if the user rotates (or triggers a
                 // configuration change) while launcher is in the foreground
@@ -2031,7 +2031,7 @@ public class Launcher extends Activity
     }
 
     FolderIcon addFolder(CellLayout layout, long container, final long screenId, int cellX,
-            int cellY) {
+            int cellY) {//TODO
         final FolderInfo folderInfo = new FolderInfo();
         folderInfo.title = getText(R.string.folder_name);
 

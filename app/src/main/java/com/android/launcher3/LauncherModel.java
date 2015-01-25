@@ -1396,7 +1396,7 @@ public class LauncherModel extends BroadcastReceiver {
                             ? Process.THREAD_PRIORITY_DEFAULT : Process.THREAD_PRIORITY_BACKGROUND);
                 }
                 if (DEBUG_LOADERS) Log.d(TAG, "step 1: loading workspace");
-                isUpgrade = loadAndBindWorkspace();
+                isUpgrade = loadAndBindWorkspace();//TODO load
 
                 if (mStopped) {
                     break keep_running;
@@ -1598,7 +1598,7 @@ public class LauncherModel extends BroadcastReceiver {
         }
 
         /** Returns whether this is an upgradge path */
-        private boolean loadWorkspace() {
+        private boolean loadWorkspace() {//TODO load
             final long t = DEBUG_LOADERS ? SystemClock.uptimeMillis() : 0;
 
             final Context context = mContext;
