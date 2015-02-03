@@ -539,6 +539,7 @@ public class FolderIcon extends LinearLayout implements FolderListener {
 //        lp.height = grid.folderIconSizePx;
 
         int iconSize = mPreviewBackground.getWidth() / 2;
+        int realSize = mIntrinsicIconSize / 2;
 
         int left = mPreviewBackground.getLeft() + (index % 2) * iconSize;
         int top = mPreviewBackground.getTop() + (index > 1 ? iconSize : 0);
